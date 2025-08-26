@@ -54,6 +54,10 @@ echo 🗄️ Configurando banco de dados automaticamente...
 python database_setup.py
 
 echo.
+echo 🔧 Corrigindo problemas de login...
+python corrigir_login.py
+
+echo.
 echo 🚀 Deseja iniciar o servidor agora? (S/N)
 set /p choice=Digite sua escolha: 
 if /i "%choice%"=="S" (
