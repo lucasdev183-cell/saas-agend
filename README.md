@@ -149,10 +149,26 @@ Sistema web de agendamento e gestão desenvolvido em Django, destinado a pequena
 
 ### Desenvolvimento Local
 
+#### **Instalação Automática (Recomendado)**
+
+**Windows:**
+```batch
+# Execute o instalador automático
+install.bat
+```
+
+**Linux/Mac:**
+```bash
+# Execute o instalador automático
+python install.py
+```
+
+#### **Instalação Manual**
+
 1. **Clone o repositório**
 ```bash
-git clone <url-do-repositorio>
-cd agendamento_sistema
+git clone https://github.com/lucasdev183-cell/saas-agend
+cd saas-agend
 ```
 
 2. **Criar ambiente virtual**
@@ -163,28 +179,33 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate  # Windows
 ```
 
-3. **Instalar dependências**
+3. **Instalar dependências uma por uma (se der erro)**
 ```bash
-pip install -r requirements.txt
+pip install --upgrade pip
+pip install django==4.2
+pip install psycopg2-binary==2.9.10
+pip install pillow==11.3.0
+pip install python-decouple==3.8
+pip install django-crispy-forms==2.1
+pip install crispy-bootstrap5==0.7
+pip install django-widget-tweaks==1.5.0
+pip install whitenoise==6.6.0
+pip install gunicorn==21.2.0
+pip install django-extensions==4.1
 ```
 
-4. **Configurar variáveis de ambiente**
+4. **Executar migrações**
 ```bash
-cp .env.example .env
-# Editar .env com suas configurações
-```
-
-5. **Executar migrações**
-```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
-6. **Criar superusuário**
+5. **Criar superusuário**
 ```bash
 python manage.py createsuperuser
 ```
 
-7. **Executar servidor**
+6. **Executar servidor**
 ```bash
 python manage.py runserver
 ```
@@ -231,11 +252,11 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Banco de Dados
 USE_SQLITE=True  # Para desenvolvimento
-DB_NAME=agendamento_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_HOST=localhost
-DB_PORT=5432
+PGDATABASE=db_sa
+PGUSER=postgres
+PGPASSWORD=xbala
+PGHOST=localhost
+PGPORT=5432
 
 # Email (futuro)
 EMAIL_HOST=smtp.gmail.com

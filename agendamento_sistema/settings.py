@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'agendamento_sistema.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='agendamento_db'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='postgres'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+        'NAME': config('PGDATABASE', default='db_sa'),
+        'USER': config('PGUSER', default='postgres'),
+        'PASSWORD': config('PGPASSWORD', default='xbala'),
+        'HOST': config('PGHOST', default='localhost'),
+        'PORT': config('PGPORT', default='5432'),
     }
 }
 
