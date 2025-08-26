@@ -34,8 +34,13 @@ echo from core.models import Usuario; Usuario.objects.get_or_create(username='ad
 echo.
 echo ✅ Instalacao concluida!
 echo ================================================
-echo 🚀 Para iniciar o servidor:
-echo    python manage.py runserver
+echo 🚀 Opcoes para continuar:
+echo.
+echo 1. Setup do banco de dados:
+echo    python database_setup.py
+echo.
+echo 2. Iniciar servidor:
+echo    python start_server.py
 echo.
 echo 🔑 Credenciais de acesso:
 echo    Usuario: admin
@@ -43,4 +48,18 @@ echo    Senha: admin123
 echo.
 echo 🌐 Acesse: http://localhost:8000
 echo ================================================
-pause
+
+echo.
+echo 🗄️ Configurando banco de dados automaticamente...
+python database_setup.py
+
+echo.
+echo 🚀 Deseja iniciar o servidor agora? (S/N)
+set /p choice=Digite sua escolha: 
+if /i "%choice%"=="S" (
+    python start_server.py
+) else (
+    echo.
+    echo ✅ Setup concluido! Execute 'python start_server.py' quando quiser iniciar.
+    pause
+)

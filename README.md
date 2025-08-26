@@ -153,14 +153,27 @@ Sistema web de agendamento e gestão desenvolvido em Django, destinado a pequena
 
 **Windows:**
 ```batch
-# Execute o instalador automático
+# 1. Execute o instalador completo (instala tudo + configura banco + inicia servidor)
 install.bat
+
+# OU faça por etapas:
+# 2a. Configurar banco de dados
+python database_setup.py
+
+# 2b. Iniciar servidor
+python start_server.py
 ```
 
 **Linux/Mac:**
 ```bash
-# Execute o instalador automático
+# 1. Execute o instalador automático
 python install.py
+
+# 2. Configure o banco de dados
+python database_setup.py
+
+# 3. Inicie o servidor
+python start_server.py
 ```
 
 #### **Instalação Manual**
