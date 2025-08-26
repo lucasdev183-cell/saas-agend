@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Usuários{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item active">Usuários</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0">Usuários</h1>
+        <p class="text-muted mb-0">Gerenciar usuários do sistema</p>
+    </div>
+    <div>
+        {% if user.is_master or user.pode_cadastrar_cliente %}
+        <a href="{% url 'core:usuarios_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Novo Usuário
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Lista de Usuários
+                </h5>
+            </div>
+            <div class="col-auto">
+                <small class="text-muted">
+                    {{ usuarios|length }} de {{ paginator.count }} usuário{{ paginator.count|pluralize }}
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="card-body border-bottom">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="busca" class="form-label">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control" 
+                           id="busca" 
+                           name="busca" 
+                           value="{{ busca }}"
+                           placeholder="Nome, usuário ou email...">
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select class="form-select" id="tipo" name="tipo">
+                    <option value="">Todos os tipos</option>
+                    {% for value, label in tipos %}
+                        <option value="{{ value }}" {% if filtro_tipo == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="btn-group w-100">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-filter me-2"></i>
+                        Filtrar
+                    </button>
+                    <a href="{% url 'core:usuarios_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>
+                        Limpar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Tabela de Usuários -->
+    <div class="card-body p-0">
+        {% if usuarios %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Telefone</th>
+                            <th>Status</th>
+                            <th width="120">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-2">
+                                        {% if usuario.foto_perfil %}
+                                            <img src="{{ usuario.foto_perfil.url }}" 
+                                                 alt="{{ usuario.get_full_name }}" 
+                                                 class="rounded-circle"
+                                                 style="width: 32px; height: 32px; object-fit: cover;">
+                                        {% else %}
+                                            {{ usuario.first_name|first|upper|default:usuario.username|first|upper }}
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong>{{ usuario.username }}</strong>
+                                        {% if usuario.cpf %}
+                                            <br><small class="text-muted">{{ usuario.cpf }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {{ usuario.get_full_name|default:"-" }}
+                                {% if usuario.data_nascimento %}
+                                    <br><small class="text-muted">{{ usuario.data_nascimento|date:"d/m/Y" }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ usuario.email|default:"-" }}</td>
+                            <td>
+                                <span class="badge bg-{% if usuario.tipo == 'master' %}danger{% elif usuario.tipo == 'restrito' %}warning{% else %}info{% endif %}">
+                                    {{ usuario.get_tipo_display }}
+                                </span>
+                            </td>
+                            <td>{{ usuario.telefone|default:"-" }}</td>
+                            <td>
+                                {% if usuario.ativo %}
+                                    <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'core:usuarios_detail' usuario.pk %}" 
+                                       class="btn btn-outline-info" 
+                                       title="Ver detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    {% if user.is_master or user == usuario %}
+                                    <a href="{% url 'core:usuarios_update' usuario.pk %}" 
+                                       class="btn btn-outline-primary" 
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if user.is_master and usuario.tipo == 'restrito' %}
+                                    <a href="{% url 'core:usuarios_permissoes' usuario.pk %}" 
+                                       class="btn btn-outline-warning" 
+                                       title="Permissões">
+                                        <i class="fas fa-key"></i>
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if user.is_master and usuario != user %}
+                                    <a href="{% url 'core:usuarios_toggle_ativo' usuario.pk %}" 
+                                       class="btn btn-outline-{% if usuario.ativo %}secondary{% else %}success{% endif %}" 
+                                       title="{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}"
+                                       onclick="return confirm('Tem certeza que deseja {% if usuario.ativo %}desativar{% else %}ativar{% endif %} este usuário?')">
+                                        <i class="fas fa-{% if usuario.ativo %}pause{% else %}play{% endif %}"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum usuário encontrado</h5>
+                <p class="text-muted">
+                    {% if busca or filtro_tipo %}
+                        Não há usuários que correspondam aos filtros aplicados.
+                    {% else %}
+                        Não há usuários cadastrados no sistema.
+                    {% endif %}
+                </p>
+                {% if user.is_master or user.pode_cadastrar_cliente %}
+                <a href="{% url 'core:usuarios_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Criar Primeiro Usuário
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <div class="card-footer">
+        <nav aria-label="Navegação por páginas">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if busca %}busca={{ busca }}&{% endif %}{% if filtro_tipo %}tipo={{ filtro_tipo }}&{% endif %}page=1">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if busca %}busca={{ busca }}&{% endif %}{% if filtro_tipo %}tipo={{ filtro_tipo }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in page_obj.paginator.page_range %}
+                    {% if page_num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                    {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if busca %}busca={{ busca }}&{% endif %}{% if filtro_tipo %}tipo={{ filtro_tipo }}&{% endif %}page={{ page_num }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if busca %}busca={{ busca }}&{% endif %}{% if filtro_tipo %}tipo={{ filtro_tipo }}&{% endif %}page={{ page_obj.next_page_number }}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if busca %}busca={{ busca }}&{% endif %}{% if filtro_tipo %}tipo={{ filtro_tipo }}&{% endif %}page={{ page_obj.paginator.num_pages }}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="text-center mt-2">
+            <small class="text-muted">
+                Exibindo {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ paginator.count }} usuário{{ paginator.count|pluralize }}
+            </small>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="card-title text-primary">{{ paginator.count }}</h4>
+                <p class="card-text">Total de Usuários</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="card-title text-info">{{ usuarios|length }}</h4>
+                <p class="card-text">Nesta Página</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="card-title text-success">
+                    {% with ativos=usuarios|length %}{{ ativos }}{% endwith %}
+                </h4>
+                <p class="card-text">Usuários Ativos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="card-title text-warning">
+                    {% if is_paginated %}{{ paginator.num_pages }}{% else %}1{% endif %}
+                </h4>
+                <p class="card-text">Página{{ paginator.num_pages|pluralize }} Total{{ paginator.num_pages|pluralize:",:is" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit form on filter change
+    document.getElementById('tipo').addEventListener('change', function() {
+        this.form.submit();
+    });
+    
+    // Adicionar efeito de hover nas linhas da tabela
+    document.querySelectorAll('tbody tr').forEach(function(row) {
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
+</script>
+{% endblock %}
